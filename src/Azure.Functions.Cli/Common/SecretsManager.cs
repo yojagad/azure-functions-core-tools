@@ -28,6 +28,35 @@ namespace Azure.Functions.Cli.Common
             }
         }
 
+        public static string AuthSettingsFilePath
+        {
+            get
+            {
+                var authFile = "local.auth.json";
+                var rootPath = ScriptHostHelpers.GetFunctionAppRootDirectory(Environment.CurrentDirectory, new List<string>
+                {
+                    ScriptConstants.HostMetadataFileName,
+                    authFile,
+                });
+                var authFilePath = Path.Combine(rootPath, authFile);
+                return authFilePath;
+            }
+        }
+        public static string MiddlewareAuthSettingsFilePath
+        {
+            get
+            {
+                var authFile = "middleware.auth.json";
+                var rootPath = ScriptHostHelpers.GetFunctionAppRootDirectory(Environment.CurrentDirectory, new List<string>
+                {
+                    ScriptConstants.HostMetadataFileName,
+                    authFile,
+                });
+                var authFilePath = Path.Combine(rootPath, authFile);
+                return authFilePath;
+            }
+        }
+
         public static string AppSettingsFileName
         {
             get
@@ -36,9 +65,31 @@ namespace Azure.Functions.Cli.Common
             }
         }
 
+        public static string AuthSettingsFileName
+        {
+            get
+            {
+                return Path.GetFileName(AuthSettingsFilePath);
+            }
+        }
+
+        public static string MiddlewareAuthSettingsFileName
+        {
+            get
+            {
+                return Path.GetFileName(MiddlewareAuthSettingsFilePath);
+            }
+        }
+
         public IDictionary<string, string> GetSecrets()
         {
             var appSettingsFile = new AppSettingsFile(AppSettingsFilePath);
+            return appSettingsFile.GetValues();
+        }
+
+        public IDictionary<string, string> GetAuthSettings()
+        {
+            var appSettingsFile = new AuthSettingsFile(AuthSettingsFilePath);
             return appSettingsFile.GetValues();
         }
 

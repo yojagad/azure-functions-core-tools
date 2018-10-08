@@ -10,7 +10,9 @@ namespace Azure.Functions.Cli.Actions.AuthActions
     class CreateAADApplication : BaseAuthAction
     {
         private readonly IAuthManager _authManager;
+
         public string AppName { get; set; }
+
         public CreateAADApplication(IAuthManager authManager)
         {
             _authManager = authManager;
@@ -26,6 +28,7 @@ namespace Azure.Functions.Cli.Actions.AuthActions
                 .Setup<string>("app-name")
                 .WithDescription("Name of AD application to create")
                 .Callback(f => AppName = f);
+
             return base.ParseArgs(args);
         }
     }

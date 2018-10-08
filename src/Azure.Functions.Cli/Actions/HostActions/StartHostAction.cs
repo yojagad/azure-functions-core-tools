@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure.Functions.Cli.Actions.HostActions.WebHost.Security;
 using Azure.Functions.Cli.Common;
@@ -42,7 +44,7 @@ namespace Azure.Functions.Cli.Actions.HostActions
     [Action(Name = "start", HelpText = "Launches the functions runtime host")]
     internal class StartHostAction : BaseAction
     {
-        private const int DefaultPort = 7071;
+        public const int DefaultPort = 7071;
         private const int DefaultTimeout = 20;
         private readonly ISecretsManager _secretsManager;
 
@@ -269,8 +271,7 @@ namespace Azure.Functions.Cli.Actions.HostActions
             {
                 // 1. Modify the Function's Uris to listen to the output of the middleware container, 
                 // rather than the port client requests come in on
-                // 2. Start the middleware container to listen to the Function's 
-                // 
+                // 2. Start the middleware container to listen to the Function's  
                 string originalUrl = originalListenUri.ToString(); // 0.0.0.0:port, where requests will be sent
                 string destinationHostUrl = baseUri.ToString(); // Output of middleware container
                 authTask = StartAuthenticationProcessAsync(originalUrl, destinationHostUrl, certPath, certPassword);

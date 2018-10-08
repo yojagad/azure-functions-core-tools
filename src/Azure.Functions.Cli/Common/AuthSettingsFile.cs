@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 namespace Azure.Functions.Cli.Common
@@ -19,7 +20,8 @@ namespace Azure.Functions.Cli.Common
             _filePath = filePath;
             try
             {
-                var content = FileSystemHelpers.ReadAllTextFromFile(_filePath);
+                string path = Path.Combine(Environment.CurrentDirectory, _filePath);
+                var content = FileSystemHelpers.ReadAllTextFromFile(path);
                 var authSettings = JObject.Parse(content);
                 Values = authSettings.ToObject<Dictionary<string, string>>();
             }

@@ -32,7 +32,7 @@ namespace Azure.Functions.Cli.Common
         {
             get
             {
-                var authFile = "local.auth.json";
+                var authFile = "local.auth.settings.json";
                 var rootPath = ScriptHostHelpers.GetFunctionAppRootDirectory(Environment.CurrentDirectory, new List<string>
                 {
                     ScriptConstants.HostMetadataFileName,
@@ -42,11 +42,12 @@ namespace Azure.Functions.Cli.Common
                 return authFilePath;
             }
         }
+
         public static string MiddlewareAuthSettingsFilePath
         {
             get
             {
-                var authFile = "middleware.auth.json";
+                var authFile = "local.middleware.json";
                 var rootPath = ScriptHostHelpers.GetFunctionAppRootDirectory(Environment.CurrentDirectory, new List<string>
                 {
                     ScriptConstants.HostMetadataFileName,
@@ -89,7 +90,10 @@ namespace Azure.Functions.Cli.Common
 
         public IDictionary<string, string> GetAuthSettings()
         {
+            // Auto generate these settings from a different file so as to keep them in-sync
+            AuthManager.PublishAuthSettings();         
             var appSettingsFile = new AuthSettingsFile(AuthSettingsFilePath);
+            AuthManager.CleanupPublishAuthSettings();
             return appSettingsFile.GetValues();
         }
 

@@ -7,8 +7,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Functions.Cli.Actions.LocalActions;
-using Azure.Functions.Cli.Arm;
 using Azure.Functions.Cli.Arm.Models;
 using Azure.Functions.Cli.Common;
 using Azure.Functions.Cli.Extensions;
@@ -138,7 +136,6 @@ namespace Azure.Functions.Cli.Actions.AzureActions
                 if (PublishLocalSettingsOnly)
                 {
                     await PublishLocalAppSettings(functionApp, additionalAppSettings);
-                    await PublishLocalAuthSettings(functionApp);
                 }
                 else
                 {
@@ -260,7 +257,6 @@ namespace Azure.Functions.Cli.Actions.AzureActions
             if (PublishLocalSettings)
             {
                 await PublishLocalAppSettings(functionApp, additionalAppSettings);
-                await PublishLocalAuthSettings(functionApp);
             }
             else if (additionalAppSettings.Any())
             {
@@ -414,27 +410,6 @@ namespace Azure.Functions.Cli.Actions.AzureActions
         {
             functionApp.AzureAppSettings = MergeAppSettings(functionApp.AzureAppSettings, local, additional);
             var result = await AzureHelper.UpdateFunctionAppAppSettings(functionApp, AccessToken);
-            if (!result.IsSuccessful)
-            {
-                ColoredConsole
-                    .Error
-                    .WriteLine(ErrorColor("Error updating app settings:"))
-                    .WriteLine(ErrorColor(result.ErrorResult));
-                return false;
-            }
-            return true;
-        }
-
-        private async Task<bool> PublishLocalAuthSettings(Site functionApp)
-        {
-            var localAuthSettings = _secretsManager.GetAuthSettings();
-            return await PublishAuthSettings(functionApp, localAuthSettings);
-        }
-        private async Task<bool> PublishAuthSettings(Site functionApp, IDictionary<string, string> local)
-        {
-            var additionalSettings = new Dictionary<string, string>();
-            functionApp.AzureAuthSettings = MergeAppSettings(functionApp.AzureAuthSettings, local, additionalSettings);
-            var result = await AzureHelper.UpdateFunctionAppAuthSettings(functionApp, AccessToken);
             if (!result.IsSuccessful)
             {
                 ColoredConsole

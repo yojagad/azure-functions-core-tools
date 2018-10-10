@@ -201,11 +201,61 @@ namespace Azure.Functions.Cli.Common
 
             return authSettingsToPublish;
         }
+    
+        /// <summary>
+        /// The format of the auth settings understood by the middleware is different than that of the
+        /// auth settings understood by published Azure Websites/Functions
+        /// In order to keep the two in-sync, auto-generate the published auth settings from the middleware auth settings
+        /// </summary>
+        public static void PublishAuthSettings()
+        {
+            // Read the middleware auth settings from the local file
+            var middlewareAuthSettingsFile = SecretsManager.MiddlewareAuthSettingsFileName;
+            var middlewareAuthSettings = new AuthSettingsFile(middlewareAuthSettingsFile);
+            var existingSettings = middlewareAuthSettings.GetValues();
+            
+            // Create a local auth .json file to update the Site's auth settings via /config/authsettings
+            var authSettingsFile = SecretsManager.AuthSettingsFileName;
+            var authsettings = new AuthSettingsFile(authSettingsFile);
 
-        // **So far, only tested with AzureActiveDirectory
-        public enum ProvidersEnum { AzureActiveDirectory, Facebook, Twitter, MicrosoftAccount, Google };
+            // Some of the values match 1:1, just with different keys
+            var keyMap = new Dictionary<string, string>
+            {
+                { "WEBSITE_AUTH_AUTO_AAD", "isAadAutoProvisioned" },
+                { "WEBSITE_AUTH_CLIENT_ID", "clientId" },
+                { "WEBSITE_AUTH_CLIENT_SECRET", "clientSecret" },
+                { "WEBSITE_AUTH_ENABLED", "enabled" },
+                { "WEBSITE_AUTH_OPENID_ISSUER", "issuer" },
+                { "WEBSITE_AUTH_RUNTIME_VERSION", "runtimeVersion"},
+                { "WEBSITE_AUTH_TOKEN_STORE", "tokenStoreEnabled" }
+            };
 
-        public enum UnauthenticatedClientAction { RedirectToLoginPage, AllowAnonymous };
+            foreach (var keyPair in keyMap)
+            {
+                // Map from existing settings' keys to the published keys
+                authsettings.SetAuthSetting(keyPair.Value, existingSettings[keyPair.Key]);
+            }
+
+            // Re-format the reply URLs
+            // 'allowedAudiences' setting of /config/authsettings is of the form ["{replyURL1}", "{replyURL2}"]
+            string serializedReplyUrls = existingSettings["WEBSITE_AUTH_ALLOWED_AUDIENCES"];
+            var replyUrls = serializedReplyUrls.Split(' ');
+            string serializedArray = JsonConvert.SerializeObject(replyUrls, Formatting.Indented);
+            authsettings.SetAuthSetting("allowedAudiences", serializedArray);
+
+            // Map Default Provider to an integer ("AzureActiveDirectory" maps to "0")
+            string provider = existingSettings["WEBSITE_AUTH_DEFAULT_PROVIDER"];
+            ProvidersEnum enumProvider;
+            Enum.TryParse(provider, out enumProvider);
+            authsettings.SetAuthSetting("defaultProvider", ((int) enumProvider).ToString());
+
+            // Map Unauthenticated Client Action to an integer ("AllowAnonymous" maps to "1")
+            string unauthClientAction = existingSettings["WEBSITE_AUTH_UNAUTHENTICATED_ACTION"];
+            UnauthenticatedClientAction enumAction;
+            Enum.TryParse(unauthClientAction, out enumAction);
+            authsettings.SetAuthSetting("unauthenticatedClientAction", ((int)enumAction).ToString()); 
+            authsettings.Commit();
+        }
 
         private static async Task<bool> PublishAuthSettingAsync(Site functionApp, string accessToken, Dictionary<string, string> authSettings)
         {

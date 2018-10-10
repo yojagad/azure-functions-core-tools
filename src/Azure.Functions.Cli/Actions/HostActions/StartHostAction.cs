@@ -266,7 +266,7 @@ namespace Azure.Functions.Cli.Actions.HostActions
                 Port = Port + 2;
             }
 
-            // Regardless of whether or not auth is enabled, clients should send requests to the original port
+            // Regardless of whether or not auth is enabled, clients should send requests here
             var originalListenUri = listenUri.SetPort(originalPort);
             var originalBaseUri = baseUri.SetPort(originalPort);
             var authTask = Task.CompletedTask;

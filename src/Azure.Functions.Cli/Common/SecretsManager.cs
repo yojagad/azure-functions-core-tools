@@ -28,9 +28,6 @@ namespace Azure.Functions.Cli.Common
             }
         }
 
-        /// <summary>
-        /// Auth settings that can be consumed by the middleware layer
-        /// </summary>
         public static string MiddlewareAuthSettingsFilePath
         {
             get

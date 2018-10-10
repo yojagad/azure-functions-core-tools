@@ -5,7 +5,7 @@ using Azure.Functions.Cli.Interfaces;
 using Fclp;
 namespace Azure.Functions.Cli.Actions.AuthActions
 {
-    // Invoke via `func auth create-aad --app-name {displayName}`
+    // Invoke via `func auth create-aad --aad-name {displayNameOfAAD}`
     [Action(Name = "create-aad", Context = Context.Auth, HelpText = "Creates an Azure Active Directory application with given application name for local development")]
     class CreateAADApplication : BaseAuthAction
     {

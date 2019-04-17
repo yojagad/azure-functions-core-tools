@@ -37,7 +37,10 @@ namespace Azure.Functions.Cli
         Extensions,
 
         [Description("Commands for working with Durable Functions")]
-        Durable
+        Durable,
+
+        [Description("commands for managing API keys")]
+        Keys
     }
 
     internal static class ContextEnumExtensions

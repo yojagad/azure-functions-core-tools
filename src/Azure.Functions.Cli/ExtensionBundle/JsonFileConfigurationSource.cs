@@ -4,6 +4,7 @@ using Azure.Functions.Cli.Helpers;
 using Microsoft.Azure.WebJobs.Logging;
 using Microsoft.Azure.WebJobs.Script;
 using Microsoft.Azure.WebJobs.Script.Configuration;
+using Microsoft.Azure.WebJobs.Script.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -13,22 +14,23 @@ namespace Azure.Functions.Cli.ExtensionBundle
     {
         private readonly ILogger _logger;
 
-        public JsonFileConfigurationSource(ScriptApplicationHostOptions options, IEnvironment environment, ILoggerFactory loggerFactory) :
-            base(options, environment, loggerFactory)
+        public JsonFileConfigurationSource(ScriptApplicationHostOptions options, IEnvironment environment, ILoggerFactory loggerFactory, IMetricsLogger metricsLogger) :
+            base(options, environment, loggerFactory, metricsLogger)
         {
             _logger = loggerFactory.CreateLogger(LogCategories.Startup);
         }
 
         public new IConfigurationProvider Build(IConfigurationBuilder builder)
         {
-            return new JsonFileConfigurationProvider(this, _logger, HostOptions);
+            return new JsonFileConfigurationProvider(this, _logger, new MetricsLogger(), HostOptions);
         }
 
         public class JsonFileConfigurationProvider : HostJsonFileConfigurationProvider
         {
             private readonly ScriptApplicationHostOptions _hostOptions;
 
-            public JsonFileConfigurationProvider(HostJsonFileConfigurationSource source, ILogger logger, ScriptApplicationHostOptions hostOptions) : base(source, logger)
+            public JsonFileConfigurationProvider(HostJsonFileConfigurationSource source, ILogger logger, IMetricsLogger metricsLogger, ScriptApplicationHostOptions hostOptions)
+                : base(source, logger, metricsLogger)
             {
                 _hostOptions = hostOptions;
             }

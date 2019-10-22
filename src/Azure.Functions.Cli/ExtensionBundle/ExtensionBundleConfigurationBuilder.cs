@@ -2,6 +2,7 @@
 using System.IO;
 using Azure.Functions.Cli.Common;
 using Microsoft.Azure.WebJobs.Script;
+using Microsoft.Azure.WebJobs.Script.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -31,7 +32,7 @@ namespace Azure.Functions.Cli.ExtensionBundle
                 }
             }
             builder.Sources.Remove(hostJsonSource);
-            builder.Add(new JsonFileConfigurationSource(_hostOptions, SystemEnvironment.Instance, new LoggerFactory()));
+            builder.Add(new JsonFileConfigurationSource(_hostOptions, SystemEnvironment.Instance, new LoggerFactory(), new MetricsLogger()));
         }
     }
 }
